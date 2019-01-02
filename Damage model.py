@@ -51,13 +51,18 @@ class Human():
         self.sens=SensModel()
         self.time=0
         self.done=False
+        #fitting parameters
         self.basalRate_M=0.05
         self.basalRate_MSd=0.1
         self.exp_M=0.01
         self.exp_Sd=0.1
-
         self.basal_Homo-M=0.1
         self.basal_Homo_SD=0.3
+
+        #internal variables:
+        #feedback rate for all mechanism
+        self.pb=np.random.lognormal(self.basalRate_M,self.BasalRate_SD)
+        self.pe=np.random.lognormal(self.exp_M,self.exp_SD)
     def step(self):
 
         for categories in self.sens.__dict__.values():
