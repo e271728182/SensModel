@@ -11,34 +11,34 @@ from copy import deepcopy
 from random import random
 class Parameter():
     def __init__(self):
-        
+
         self.mu=rd.uniform(0.01,0.1)
         self.sigma=rd.uniform(0.05,0.1)
         self.value=0
         self.dMu=0
         self.dSigma=0
-        
-        
+
+#s
     def assignValue(self):
         return max(rd.gauss(self.mu,self.sigma),0)
 
 class DamageModel():
-    
+
     def __init__(self):
-        
-        self.initialDamage=Parameter()               
-        self.treshold=Parameter()              
-        self.damage=Parameter()            
-              
+
+        self.initialDamage=Parameter()
+        self.treshold=Parameter()
+        self.damage=Parameter()
+
         self.growth=Parameter()
-        
+
     def refresh(self):
         self.initialDamage.value=self.initialDamage.assignValue()
         self.treshold.value=self.treshold.assignValue()
         self.damage.value=self.damage.assignValue()
-        self.growth.value=self.growth.assignValue()    
+        self.growth.value=self.growth.assignValue()
 
-        
+
 class SensModel():
     def __init__(self):
         self.cat1=DamageModel()
@@ -46,19 +46,25 @@ class SensModel():
 
 
 class Human():
-    
+
     def __init__(self):
         self.sens=SensModel()
         self.time=0
-        self.done=False 
-        
+        self.done=False
+        self.basalRate_M=0.05
+        self.basalRate_MSd=0.1
+        self.exp_M=0.01
+        self.exp_Sd=0.1
+
+        self.basal_Homo-M=0.1
+        self.basal_Homo_SD=0.3
     def step(self):
-        
+
         for categories in self.sens.__dict__.values():
-            
+
             categories.initialDamage.value=categories.initialDamage.value*(1+categories.growth.value)+categories.damage.value
-        
-        
+
+
             if categories.initialDamage.value>categories.treshold.value or self.time>115:
 
                 return True
@@ -70,9 +76,9 @@ class Human():
         _results=np.zeros(100)
         for i in range(0,nbsim):
             for categories in self.sens.__dict__.values():
-                
+
                 categories.refresh()
-            
+
             self.time=0
             self.done=False
 
@@ -82,12 +88,12 @@ class Human():
                     _results[self.time]=_results[self.time]+1
                 self.time=self.time+1
         return _results/nbsim
-    
+
     def derivatives(self,delta,simulN,costFunction,goal):
 
         for categories in self.sens.__dict__.values():
             for damage in categories.__dict__.values():
-              
+
                 damage.mu=damage.mu+delta
                     #run simulation with adjusted value
                 dx=np.sum(np.square(self.simulate(simulN)-goal))
@@ -105,10 +111,10 @@ class Human():
                 damage.sigma=damage.sigma-delta
 
     def gradient(self,learningRate):
-        
+
         for categories in self.sens.__dict__.values():
             for damages in categories.__dict__.values():
-          
+
                 try:
                     if damage.dMu<=0:
                         dtoUse=max(-0.25,damage.dMu*learningRate)
@@ -169,8 +175,8 @@ test=Human()
 #test.sens.damage.mu=dm
 #test.sens.damage.sigma=ds
 for i in range(10):
-    
-    sCurve=test.simulate(simulN)        
+
+    sCurve=test.simulate(simulN)
     costFunction=np.sum(np.square(sCurve-goal))
     print('costfunction ',costFunction)
    #print('treshold',test.sens.treshold.mu)
@@ -219,4 +225,3 @@ print(test.sens.initialDamage.dMu)
 print(test.sens.treshold.dMu)
 print(test.sens.growth.dMu)
 print(test.sens.damage.dMu)
-
