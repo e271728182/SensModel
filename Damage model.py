@@ -58,11 +58,34 @@ class Human():
         self.exp_Sd=0.1
         self.basal_Homo-M=0.1
         self.basal_Homo_SD=0.3
-
+        self.TotalDamage={}
         #internal variables:
         #feedback rate for all mechanism
         self.pb=np.random.lognormal(self.basalRate_M,self.BasalRate_SD)
         self.pe=np.random.lognormal(self.exp_M,self.exp_SD)
+class Mechanism():
+    def __init__(self):
+        self.basalRate=0
+        self.exp=0
+        self.damageIncrement=0
+        self.cumulDamage=0
+    def damageIncrementC(self,personDamage):
+        return self.basalRate+self.exp*personDamage
+
+    def cumulDamageC(self):
+        return self.cumulDamage+self.damageIncrement
+
+class Category(self):
+    def __init__(self):
+        self.mechanismList=[]
+        self.cumulDamage=0
+    def cumulDamageC(self):
+        __value=0
+        for mechanism in self.mechanismList:
+            __value=mechanism.cumulDamage+__value
+        return __value
+
+
     def step(self):
 
         for categories in self.sens.__dict__.values():
