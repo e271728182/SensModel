@@ -9,46 +9,13 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from random import random
-class Parameter():
-    def __init__(self):
-
-        self.mu=rd.uniform(0.01,0.1)
-        self.sigma=rd.uniform(0.05,0.1)
-        self.value=0
-        self.dMu=0
-        self.dSigma=0
-
-#s
-    def assignValue(self):
-        return max(rd.gauss(self.mu,self.sigma),0)
-
-class DamageModel():
-
-    def __init__(self):
-
-        self.initialDamage=Parameter()
-        self.treshold=Parameter()
-        self.damage=Parameter()
-
-        self.growth=Parameter()
-
-    def refresh(self):
-        self.initialDamage.value=self.initialDamage.assignValue()
-        self.treshold.value=self.treshold.assignValue()
-        self.damage.value=self.damage.assignValue()
-        self.growth.value=self.growth.assignValue()
-
-
-class SensModel():
-    def __init__(self):
-        self.cat1=DamageModel()
 
 
 
 class Human():
 
     def __init__(self):
-        self.sens=SensModel()
+
         self.time=0
         self.done=False
         #fitting parameters
@@ -56,13 +23,48 @@ class Human():
         self.basalRate_MSd=0.1
         self.exp_M=0.01
         self.exp_Sd=0.1
-        self.basal_Homo-M=0.1
+        self.basal_Homo_M=0.1
         self.basal_Homo_SD=0.3
-        self.TotalDamage={}
+        self.totalDamage=0
+        self.shapeDeath=1
         #internal variables:
         #feedback rate for all mechanism
-        self.pb=np.random.lognormal(self.basalRate_M,self.BasalRate_SD)
-        self.pe=np.random.lognormal(self.exp_M,self.exp_SD)
+        self.pb=self.pbDist()
+        self.pe=self.peDist()
+        self.categoryList=[]
+
+    def pbDist(self):
+        return np.random.lognormal(self.basalRate_M,self.BasalRate_SD)
+    def peDist(seff):
+        return np.random.lognormal(self.exp_M,self.exp_SD)
+
+    def createCategory(self,nbCat):
+        for i in range(nbCat+1):
+            _newCat=Category()
+            self.categoryList.append(_newCat)
+
+    def createMechanism(self,nbMec):
+        for category in self.categoryList:
+            for i in range(nbMec+1):
+                #create a mechanism
+                mec=Mechanism()
+                #assign it a basal rate and & feedback rate
+                mec.basalRate=self.basal_Homo*self.pb+(1-self.basal_Homo)*self.pbDist()
+                mec.exp=self.basal_Homo_SD*self.pe +(1-self.basal_Homo_SD)*self.peDist()
+                #stuff it into the mechanism list of the category
+                category.mechanismList.append(mec)
+
+    def updateTotalDamage(self):
+        return sum([cat.cumulDamage for cat in self.categoryList])
+
+    def updateMecDamage(self):
+        for cat in self.categoryList:
+            for mec in cat.mechanismList:
+                mec.damageIncrement=mec.damageIncrementC(self.totalDamage)
+                mec.cumulDamage=mec.cumulDamageC()
+
+
+
 class Mechanism():
     def __init__(self):
         self.basalRate=0
