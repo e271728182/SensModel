@@ -33,15 +33,15 @@ class Human():
         self.pe=self.peDist()
         self.categoryList=[]
         self.maxCatDamage=max([cat.cumulDamage in self.categoryList])
-    
+
     def rPd(self,damage):
         return 2**-(self.shape_death*(1-damage))
 
     def spd(self,damage):
         return (self.rpd(damage)-self.rpd(0))/(1-self.rpd(0))
 
-    def isDeadC(self):
-        if self.maxCatDamage>np.random.uniform(0,1):
+    def isDeadC(self,damage):
+        if self.spd(damage)>np.random.uniform(0,1):
             return True
         else:
             return False
