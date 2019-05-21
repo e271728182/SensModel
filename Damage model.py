@@ -15,9 +15,10 @@ from random import random
 class Human():
     def __init__(self,basal_M,basal_sd,exp_m,exp_sd,basal_homo,exp_homo,shape_death):
 
-        self.time=0
-        self.done=False
-        self.nbCat
+        self.age=0
+        self.isDead=False
+        self.nbCat=7
+
         #fitting parameters
         self.basalRate_M=basal_M
         self.basalRate_Sd=basal_sd
@@ -32,9 +33,20 @@ class Human():
         self.pb=self.pbDist()
         self.pe=self.peDist()
         self.categoryList=[]
-        self.maxCatDamage=max([cat.cumulDamage in self.categoryList])
+        self.createCategory(self.nbCat)
+        self.createMechanism(10)
+        self.maxCatDamage=max([cat.cumulDamage for cat in self.categoryList])
+    def reborn(self):
+        self.age=0
+        self.totalDamage=0
+        self.maxDamage=0
+        #reset all categories & mechanism to 0
+        for cat in self.categoryList:
+            cat.cumulDamage=0
+            for mec in cat.mechanismList:
+                mec.cumulDamage=0
 
-    def rPd(self,damage):
+    def rpd(self,damage):
         return 2**-(self.shape_death*(1-damage))
 
     def spd(self,damage):
@@ -42,22 +54,22 @@ class Human():
 
     def isDeadC(self,damage):
         if self.spd(damage)>np.random.uniform(0,1):
-            return True
+            self.isDead= True
         else:
-            return False
+            self.isDead= False
+        #you die or live your age increases by one.
+        self.age=self.age+1
+
     def pbDist(self):
-        return np.random.lognormal(self.basalRate_M,self.BasalRate_SD)
+        return np.random.lognormal(self.basalRate_M,self.basalRate_Sd)
 
-    def peDist(seff):
-        return np.random.lognormal(self.exp_M,self.exp_SD)
-    def calculateTotalDamage(self):
+    def peDist(self):
+        return np.random.lognormal(self.exp_M,self.exp_Sd)
 
-        return sum([cumul for cat.cumulDamageC in self.categoryList])
-    def createCategory(self,nbCat
 
-        for i in range(nbCat+1):
-            _newCat=Category()
-            self.categoryList.append(_newCat)
+    def createCategory(self,nbCat):
+        for i in range(1,self.nbCat):
+            self.categoryList.append(Category())
 
     def createMechanism(self,nbMec):
         for category in self.categoryList:
@@ -70,22 +82,29 @@ class Human():
                 #stuff it into the mechanism list of the category
                 category.mechanismList.append(mec)
 
-    def updateTotalDamage(self):
-        return sum([cat.cumulDamageC() for cat in self.categoryList])
+    def updateCatDamage(self):
+        for cat in self.categoryList:
+            cat.cumulDamageC()
+
+    def updateAllDamage(self):
+        catDamage=[cat.cumulDamage for cat in self.categoryList]
+        self.totalDamage= sum(catDamage)
+        self.maxDamage=max(catDamage)
 
     def updateMecDamage(self):
         for cat in self.categoryList:
             for mec in cat.mechanismList:
                 mec.damageIncrement=mec.damageIncrementC(self.totalDamage)
-                mec.cumulDamage=mec.cumulDamageC()
 
-class Category(self):
+
+class Category():
     def __init__(self):
         self.mechanismList=[]
         self.cumulDamage=0
+
     def cumulDamageC(self):
-    self.cumulDamage=self.cumulDamage+sum([mec.damageIncrementC in self.mechanismList])
-    return self.cumulDamage
+        self.cumulDamage=sum([mec.cumulDamage for mec in self.mechanismList])
+
 
 
 class Mechanism():
@@ -94,11 +113,36 @@ class Mechanism():
         self.exp=0
         self.damageIncrement=0
         self.cumulDamage=0
+
     def damageIncrementC(self,personDamage):
 
-        self.damageIncrement=self.damageIncrement+self.basalRate+self.exp*personDamage
-        self.cumulDamage=self.cumulDamage+self.cumulDamage+self.damageIncrement
-        return self.cumulDamage
+        self.damageIncrement=self.basalRate+self.exp*personDamage
+        self.cumulDamage=self.cumulDamage+self.damageIncrement
+
+
+if __name__=='__main__':
+    #dummy parameters:
+
+    basal_M=-7
+    basal_sd=1.5
+    exp_m=-7
+    exp_sd=1.5
+    basal_homo=0.3
+    exp_homo=0.3
+    shape_death=4
+    #human object
+    smodel=Human(basal_M,basal_sd,exp_m,exp_sd,basal_homo,exp_homo,shape_death)
+    #to loop through later on
+    while smodel.isDead==False and smodel.age<115:
+        smodel.updateMecDamage()
+        smodel.updateCatDamage()
+        smodel.updateAllDamage()
+        smodel.isDeadC(smodel.maxDamage)
+    print(smodel.age)
+    #just reset all parameters once you're dead
+    smodel.reborn()
+    print('Done')
+
     #def cumulDamageC(self):
     #    return self.cumulDamage+self.damageIncrement
 
