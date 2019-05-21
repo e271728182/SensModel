@@ -40,6 +40,7 @@ class Human():
         self.age=0
         self.totalDamage=0
         self.maxDamage=0
+        self.isDead=False
         #reset all categories & mechanism to 0
         for cat in self.categoryList:
             cat.cumulDamage=0
@@ -53,7 +54,8 @@ class Human():
         return (self.rpd(damage)-self.rpd(0))/(1-self.rpd(0))
 
     def isDeadC(self,damage):
-        if self.spd(damage)>np.random.uniform(0,1):
+        aa=self.spd(damage)
+        if aa>np.random.uniform(0,1):
             self.isDead= True
         else:
             self.isDead= False
@@ -123,26 +125,29 @@ class Mechanism():
 if __name__=='__main__':
     #dummy parameters:
 
-    basal_M=-7
+    basal_M=-8
     basal_sd=1.5
-    exp_m=-7
+    exp_m=-8
     exp_sd=1.5
-    basal_homo=0.3
-    exp_homo=0.3
-    shape_death=4
+    basal_homo=0.6
+    exp_homo=0.6
+    shape_death=5
     #human object
     smodel=Human(basal_M,basal_sd,exp_m,exp_sd,basal_homo,exp_homo,shape_death)
     #to loop through later on
-    while smodel.isDead==False and smodel.age<115:
-        smodel.updateMecDamage()
-        smodel.updateCatDamage()
-        smodel.updateAllDamage()
-        smodel.isDeadC(smodel.maxDamage)
-    print(smodel.age)
-    #just reset all parameters once you're dead
-    smodel.reborn()
-    print('Done')
-
+    cc=[]
+    for i in range(1,500):
+        while smodel.isDead==False and smodel.age<115:
+            smodel.updateMecDamage()
+            smodel.updateCatDamage()
+            smodel.updateAllDamage()
+            smodel.isDeadC(smodel.maxDamage)
+        #print(smodel.age)
+        cc.append(smodel.age)
+        #just reset all parameters once you're dead
+        smodel.reborn()
+        #print('Done')
+    print(cc)
     #def cumulDamageC(self):
     #    return self.cumulDamage+self.damageIncrement
 
