@@ -135,19 +135,27 @@ if __name__=='__main__':
     #human object
     smodel=Human(basal_M,basal_sd,exp_m,exp_sd,basal_homo,exp_homo,shape_death)
     #to loop through later on
-    cc=[]
-    for i in range(1,500):
+    ageAtDeath=[]
+    import time
+    start_time = time.time()
+    batch_size=500
+
+    for i in range(1,batch_size):
         while smodel.isDead==False and smodel.age<115:
             smodel.updateMecDamage()
             smodel.updateCatDamage()
             smodel.updateAllDamage()
             smodel.isDeadC(smodel.maxDamage)
         #print(smodel.age)
-        cc.append(smodel.age)
+        ageAtDeath.append(smodel.age)
         #just reset all parameters once you're dead
         smodel.reborn()
         #print('Done')
-    print(cc)
+    DeathCurve = pd.Series(ageAtDeath).value_counts(sort=False)/batch_size
+    print(ageAtDeath)
+    print(DeathCurve)
+    print("--- %s seconds ---" % (time.time() - start_time))
+
     #def cumulDamageC(self):
     #    return self.cumulDamage+self.damageIncrement
 
