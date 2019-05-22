@@ -49,7 +49,7 @@ class Human():
                 mec.cumulDamage=0
 
     def rpd(self,damage):
-        return ag.exp(-self.shape_death*(1-damage))
+        return exp(-self.shape_death*(1-damage))
 
     def spd(self,damage):
         return (self.rpd(damage)-self.rpd(0))/(1-self.rpd(0))
