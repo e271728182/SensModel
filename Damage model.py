@@ -123,8 +123,15 @@ class Mechanism():
 
 
 if __name__=='__main__':
-    #dummy parameters:
+    import time
+    import numpy as np
+    import pandas as pd
 
+    #social security table
+    path=r'C:\Users\gjeanpat\SensModel\SS2015.csv'
+    keycolumn='Pb_Male'
+    SocialSecurity=pd.read_csv(path, engine='python')
+    #dummy parameters:
     basal_M=-8
     basal_sd=1.5
     exp_m=-8
@@ -136,10 +143,10 @@ if __name__=='__main__':
     smodel=Human(basal_M,basal_sd,exp_m,exp_sd,basal_homo,exp_homo,shape_death)
     #to loop through later on
     ageAtDeath=[]
-    import time
+    
     start_time = time.time()
     batch_size=500
-
+#loop to create deaths and generate a simulation
     for i in range(1,batch_size):
         while smodel.isDead==False and smodel.age<115:
             smodel.updateMecDamage()
@@ -150,10 +157,15 @@ if __name__=='__main__':
         ageAtDeath.append(smodel.age)
         #just reset all parameters once you're dead
         smodel.reborn()
-        #print('Done')
+ #pick the list of ages at death and create a panda series that count number of times 
+ # each value appears and divide by batch_size      
     DeathCurve = pd.Series(ageAtDeath).value_counts(sort=False)/batch_size
-    print(ageAtDeath)
-    print(DeathCurve)
+    #cost function is sum of square
+    costF= np.square(SocialSecurity[keycolumn].add(-freq, fill_value=0)).sum()
+
+ 
+
+    #program's run time to see how dim witted we're allowed to be
     print("--- %s seconds ---" % (time.time() - start_time))
 
     #def cumulDamageC(self):
