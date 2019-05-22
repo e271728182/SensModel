@@ -9,7 +9,8 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from random import random
-
+import autograd as ag
+from autograd.variable import Variable
 
 
 class Human():
@@ -48,7 +49,7 @@ class Human():
                 mec.cumulDamage=0
 
     def rpd(self,damage):
-        return 2**-(self.shape_death*(1-damage))
+        return ag.exp(-self.shape_death*(1-damage))
 
     def spd(self,damage):
         return (self.rpd(damage)-self.rpd(0))/(1-self.rpd(0))
@@ -129,7 +130,9 @@ if __name__=='__main__':
 
     #social security table
     path=r'C:\Users\gjeanpat\SensModel\SS2015.csv'
+    #the column of Qx values for male in Social security 2015
     keycolumn='Pb_Male'
+    #social security table of 2015 for male and female
     SocialSecurity=pd.read_csv(path, engine='python')
     #dummy parameters:
     basal_M=-8
@@ -161,7 +164,7 @@ if __name__=='__main__':
  # each value appears and divide by batch_size      
     DeathCurve = pd.Series(ageAtDeath).value_counts(sort=False)/batch_size
     #cost function is sum of square
-    costF= np.square(SocialSecurity[keycolumn].add(-freq, fill_value=0)).sum()
+    costF= np.square(SocialSecurity[keycolumn].subtract(DeathCurve, fill_value=0)).sum()
 
  
 
