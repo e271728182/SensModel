@@ -9,13 +9,13 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from random import random
-import autograd as ag
-from autograd.variable import Variable
+#import autograd as ag
+#from autograd.variable import Variable
 
 
 class Human():
     def __init__(self,basal_M,basal_sd,exp_m,exp_sd,basal_homo,exp_homo,shape_death):
-
+        
         self.age=0
         self.isDead=False
         self.nbCat=7
@@ -49,7 +49,7 @@ class Human():
                 mec.cumulDamage=0
 
     def rpd(self,damage):
-        return exp(-self.shape_death*(1-damage))
+        return 2**(-self.shape_death*(1-damage))
 
     def spd(self,damage):
         return (self.rpd(damage)-self.rpd(0))/(1-self.rpd(0))
@@ -146,7 +146,7 @@ if __name__=='__main__':
     smodel=Human(basal_M,basal_sd,exp_m,exp_sd,basal_homo,exp_homo,shape_death)
     #to loop through later on
     ageAtDeath=[]
-    
+
     start_time = time.time()
     batch_size=500
 #loop to create deaths and generate a simulation
@@ -160,13 +160,14 @@ if __name__=='__main__':
         ageAtDeath.append(smodel.age)
         #just reset all parameters once you're dead
         smodel.reborn()
- #pick the list of ages at death and create a panda series that count number of times 
- # each value appears and divide by batch_size      
+ #pick the list of ages at death and create a panda series that count number of times
+ # each value appears and divide by batch_size
     DeathCurve = pd.Series(ageAtDeath).value_counts(sort=False)/batch_size
     #cost function is sum of square
     costF= np.square(SocialSecurity[keycolumn].subtract(DeathCurve, fill_value=0)).sum()
 
- 
+
+
 
     #program's run time to see how dim witted we're allowed to be
     print("--- %s seconds ---" % (time.time() - start_time))
